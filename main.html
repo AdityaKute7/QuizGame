@@ -49,8 +49,12 @@
         background: #4facfe;
         color: white;
     }
-    #next-btn, #start-btn {
+    .btn-container {
         margin-top: 20px;
+        display: flex;
+        justify-content: space-between;
+    }
+    .btn-container button {
         padding: 10px 20px;
         border: none;
         background: #4facfe;
@@ -59,9 +63,25 @@
         cursor: pointer;
         font-size: 16px;
     }
-    #next-btn {
-        display: none;
-        float: right;
+    /* Premium Start Button */
+    #start-btn {
+        background: linear-gradient(45deg, #4facfe, #00c6ff);
+        padding: 15px 30px;
+        font-size: 18px;
+        color: white;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(0, 198, 255, 0.4);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    #start-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(0, 198, 255, 0.6);
+        background: linear-gradient(45deg, #00c6ff, #4facfe);
+    }
+    #start-btn:active {
+        transform: scale(0.95);
     }
     footer {
         position: fixed;
@@ -92,7 +112,11 @@
     <div id="quiz-box" style="display: none;">
         <div class="question" id="question"></div>
         <div class="options" id="options"></div>
-        <button id="next-btn">Next</button>
+        <div class="btn-container">
+            <button id="prev-btn">Previous</button>
+            <button id="skip-btn">Skip</button>
+            <button id="next-btn" style="display: none;">Next</button>
+        </div>
     </div>
 
     <!-- Score -->
@@ -126,10 +150,13 @@
 
     let currentQuestion = 0;
     let score = 0;
+    let answered = Array(quizData.length).fill(null); // store answers
 
     const questionEl = document.getElementById("question");
     const optionsEl = document.getElementById("options");
     const nextBtn = document.getElementById("next-btn");
+    const prevBtn = document.getElementById("prev-btn");
+    const skipBtn = document.getElementById("skip-btn");
     const scoreContainer = document.getElementById("score-container");
     const startScreen = document.getElementById("start-screen");
     const quizBox = document.getElementById("quiz-box");
@@ -144,21 +171,42 @@
         const q = quizData[currentQuestion];
         questionEl.textContent = `Q${currentQuestion + 1}: ${q.question}`;
         optionsEl.innerHTML = "";
+
+        // Show/hide buttons based on answer state
+        nextBtn.style.display = answered[currentQuestion] !== null ? "block" : "none";
+        skipBtn.style.display = answered[currentQuestion] === null ? "block" : "none";
+
         q.options.forEach(opt => {
             const btn = document.createElement("button");
             btn.textContent = opt;
             btn.onclick = () => selectAnswer(opt);
+            if (answered[currentQuestion] !== null) {
+                btn.disabled = true;
+                if (opt === quizData[currentQuestion].answer) {
+                    btn.style.background = "#4caf50";
+                    btn.style.color = "white";
+                } else if (opt === answered[currentQuestion]) {
+                    btn.style.background = "#f44336";
+                    btn.style.color = "white";
+                }
+            }
             optionsEl.appendChild(btn);
         });
+
+        prevBtn.disabled = currentQuestion === 0;
     }
 
     function selectAnswer(selected) {
-        const correct = quizData[currentQuestion].answer;
-        if (selected === correct) score++;
+        answered[currentQuestion] = selected;
+        if (selected === quizData[currentQuestion].answer) {
+            score++;
+        }
         nextBtn.style.display = "block";
+        skipBtn.style.display = "none"; // hide skip after selecting answer
+
         Array.from(optionsEl.children).forEach(button => {
             button.disabled = true;
-            if (button.textContent === correct) {
+            if (button.textContent === quizData[currentQuestion].answer) {
                 button.style.background = "#4caf50";
                 button.style.color = "white";
             } else if (button.textContent === selected) {
@@ -172,7 +220,23 @@
         currentQuestion++;
         if (currentQuestion < quizData.length) {
             loadQuestion();
-            nextBtn.style.display = "none";
+        } else {
+            showScore();
+        }
+    };
+
+    prevBtn.onclick = () => {
+        if (currentQuestion > 0) {
+            currentQuestion--;
+            loadQuestion();
+        }
+    };
+
+    skipBtn.onclick = () => {
+        answered[currentQuestion] = null; // clear any answer
+        currentQuestion++;
+        if (currentQuestion < quizData.length) {
+            loadQuestion();
         } else {
             showScore();
         }
