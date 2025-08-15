@@ -5,9 +5,13 @@ Users can answer multiple-choice questions, skip questions, and navigate back to
 
 ---
 
-##  Live Demo
-[Click Here to Play the Quiz](https://your-netlify-link.netlify.app)  
-*(Replace with your actual deployed Netlify link)*
+<h2>🚀 Live Demo</h2>
+<p>
+  <a href="https://aditya534.netlify.app" target="_blank" rel="noopener noreferrer">
+    Click Here to Play the Quiz
+  </a>
+</p>  
+
 
 ---
 
@@ -21,7 +25,6 @@ Users can answer multiple-choice questions, skip questions, and navigate back to
 
 ---
 
-## 📂 Project Structure
 ## Technologies Used
 - **HTML5**
 - **CSS3**
